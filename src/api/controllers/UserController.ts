@@ -23,7 +23,7 @@ export class UserController {
   };
 
   getUserById: RequestHandler = async (req, res, next) => {
-    const id = req.params.user_id;
+    const id = req.params.id;
     if (!id) return sendError(res, "Invalid id", 400);
 
     try {
@@ -65,7 +65,7 @@ export class UserController {
   };
 
   updateUser: RequestHandler = async (req, res, next) => {
-    const id = req.params.user_id;
+    const id = req.params.id;
     if (!id) return sendError(res, "Invalid id", 400);
 
     const { username, email, password, displayName, avatarUrl } = req.body;
@@ -94,7 +94,7 @@ export class UserController {
   };
 
   deleteUser: RequestHandler = async (req, res, next) => {
-    const id = req.params.user_id;
+    const id = req.params.id;
     if (!id) return sendError(res, "Invalid id", 400);
 
     try {

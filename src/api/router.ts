@@ -18,9 +18,9 @@ const userController = new UserController();
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 router.get("/users", asyncHandler(userController.getAllUsers));
-router.get("/users/:user_id", asyncHandler(userController.getUserById));
+router.get("/users/:id", asyncHandler(userController.getUserById));
 router.post("/users", asyncHandler(userController.createUser));
-router.put("/users/:user_id", asyncHandler(userController.updateUser));
-router.delete("/users/:user_id", asyncHandler(userController.deleteUser));
+router.put("/users/:id", asyncHandler(userController.updateUser));
+router.delete("/users/:id", asyncHandler(userController.deleteUser));
 
 export default router;
