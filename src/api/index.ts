@@ -45,6 +45,7 @@ const logErrors = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) => {
+  console.error("🔴 API ERROR", err);
   sendError(res, err.message || "Internal Server Error", 500, err);
 };
 
