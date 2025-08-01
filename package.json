@@ -27,6 +27,9 @@
     "typescript": "^5.8.3"
   },
   "jest": {
+    "setupFiles": [
+      "<rootDir>/../jest.setup.ts"
+    ],
     "moduleFileExtensions": [
       "js",
       "json",

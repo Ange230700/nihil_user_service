@@ -140,6 +140,92 @@ paths:
         "404":
           description: User not found
 
+  /users/{userId}/profile:
+    get:
+      tags: [User Profiles]
+      summary: Get user profile by user ID
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User profile found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/UserProfileDTO"
+        "404":
+          description: User profile not found
+    post:
+      tags: [User Profiles]
+      summary: Create a user profile
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileCreate"
+      responses:
+        "201":
+          description: User profile created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/UserProfileDTO"
+        "409":
+          description: User already has a profile
+    put:
+      tags: [User Profiles]
+      summary: Update user profile by user ID
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserProfileUpdate"
+      responses:
+        "200":
+          description: User profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/UserProfileDTO"
+        "404":
+          description: User profile not found
+
 components:
   schemas:
     UserDTO:
@@ -172,6 +258,41 @@ components:
           format: date-time
           example: 2024-08-01T12:22:45.000Z
 
+    UserProfileDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 99887766-aaaa-bbbb-cccc-111122223333
+        userId:
+          type: string
+          example: 40cf2348-d871-11ee-8a82-0242ac110002
+        bio:
+          type: string
+          nullable: true
+          example: "Full-stack developer. Love TypeScript and cats."
+        location:
+          type: string
+          nullable: true
+          example: "Paris, France"
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          example: "1998-06-21"
+        website:
+          type: string
+          nullable: true
+          example: "https://angekouakou.dev"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-08-01T12:22:45.000Z"
+      required:
+        - id
+        - userId
+        - updatedAt
+
     UserCreate:
       type: object
       required: [username, email, password]
@@ -198,3 +319,5 @@ components:
           type: string
         avatarUrl:
           type: string
+
+    
