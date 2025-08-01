@@ -1,0 +1,23 @@
+%% user\docs\erd.mmd
+
+erDiagram
+    user {
+        UUID id PK
+        STRING username
+        STRING email
+        STRING password_hash
+        STRING display_name
+        STRING avatar_url
+        DATETIME created_at
+        DATETIME updated_at
+    }
+    userprofile {
+        UUID id PK
+        UUID user_id FK
+        STRING bio
+        STRING location
+        DATE birthdate
+        STRING website
+        DATETIME updated_at
+    }
+    user ||--o| userprofile : "has"
