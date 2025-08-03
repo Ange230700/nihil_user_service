@@ -1,4 +1,4 @@
-// user\src\application\useCases\UserProfileUseCases.ts
+// user\src\application\useCases\UserProfileUseCases.mts
 
 import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile";
 import { IUserProfileRepository } from "@nihil_backend/user/application/interfaces/IUserProfileRepository";

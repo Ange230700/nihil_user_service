@@ -1,7 +1,7 @@
-// user/src/infrastructure/repositories/UserProfileRepository.ts
+// user\src\infrastructure\repositories\UserProfileRepository.mts
 
-import { PrismaClient } from "nihildbuser/prisma/generated/client";
-import { PrismaClientKnownRequestError } from "nihildbuser/prisma/generated/client/runtime/library";
+import { PrismaClient } from "nihildbuser/prisma/generated/client/index.js";
+import { PrismaClientKnownRequestError } from "nihildbuser/prisma/generated/client/runtime/library.js";
 import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile";
 import { IUserProfileRepository } from "@nihil_backend/user/application/interfaces/IUserProfileRepository";
 const prisma = new PrismaClient();

@@ -1,4 +1,4 @@
-// user\src\api\tests\userprofile.crud.spec.ts
+// user\src\api\tests\userprofile.crud.spec.mts
 
 import request from "supertest";
 import app from "@nihil_backend/user/api/config";

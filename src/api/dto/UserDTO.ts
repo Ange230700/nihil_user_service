@@ -1,4 +1,4 @@
-// user\src\api\dto\UserDTO.ts
+// user\src\api\dto\UserDTO.mts
 
 import { User } from "@nihil_backend/user/core/entities/User";
 

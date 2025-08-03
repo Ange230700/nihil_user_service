@@ -1,4 +1,4 @@
-// user\src\api\server.ts
+// user\src\api\server.mts
 
 import app from "@nihil_backend/user/api/config";
 

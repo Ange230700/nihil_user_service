@@ -1,4 +1,4 @@
-// user\src\api\dto\UserProfileDTO.ts
+// user\src\api\dto\UserProfileDTO.mts
 
 import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile";
 

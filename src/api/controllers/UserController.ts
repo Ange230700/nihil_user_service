@@ -1,4 +1,4 @@
-// user\src\api\controllers\UserController.ts
+// user\src\api\controllers\UserController.mts
 
 import { RequestHandler } from "express";
 import { UserRepository } from "@nihil_backend/user/infrastructure/repositories/UserRepository";
@@ -7,7 +7,7 @@ import {
   sendSuccess,
   sendError,
 } from "@nihil_backend/user/api/helpers/sendResponse";
-import { toUserDTO } from "@nihil_backend/user/api/dto";
+import { toUserDTO } from "@nihil_backend/user/api/dto/index";
 
 export class UserController {
   private readonly repo = new UserRepository();

@@ -1,4 +1,4 @@
-// user\src\api\controllers\UserProfileController.ts
+// user\src\api\controllers\UserProfileController.mts
 
 import { RequestHandler } from "express";
 import { UserProfileUseCases } from "@nihil_backend/user/application/useCases/UserProfileUseCases";
