@@ -1,12 +1,12 @@
-// user\src\api\index.ts
+// user\src\api\config.ts
 
 import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 
-import router from "@nihil_backend/user/src/api/router";
-import { sendError } from "@nihil_backend/user/src/api/helpers/sendResponse";
+import router from "@nihil_backend/user/api/router";
+import { sendError } from "@nihil_backend/user/api/helpers/sendResponse";
 
 const app = express();
 

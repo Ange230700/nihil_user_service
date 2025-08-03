@@ -1,7 +1,7 @@
 // user\src\api\tests\user.crud.spec.ts
 
 import request from "supertest";
-import app from "@nihil_backend/user/src/api/index";
+import app from "@nihil_backend/user/api/config";
 
 jest.setTimeout(15000);
 const API_PREFIX = "/api/users";

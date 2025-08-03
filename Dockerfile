@@ -19,4 +19,4 @@ COPY --from=build /app/user/package*.json ./
 COPY --from=build /app/user/node_modules ./node_modules
 USER appuser
 EXPOSE 3000
-CMD ["node", "dist/api/server.js"]
+CMD ["node", "dist/src/api/server.js"]

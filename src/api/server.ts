@@ -1,6 +1,6 @@
 // user\src\api\server.ts
 
-import app from "@nihil_backend/user/src/api/index";
+import app from "@nihil_backend/user/api/config";
 
 const PORT = process.env.PORT || 3000;
 

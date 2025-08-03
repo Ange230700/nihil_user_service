@@ -2,8 +2,8 @@
 
 import { PrismaClient } from "nihildbuser/prisma/generated/client";
 import { PrismaClientKnownRequestError } from "nihildbuser/prisma/generated/client/runtime/library";
-import { UserProfile } from "@nihil_backend/user/src/core/entities/UserProfile";
-import { IUserProfileRepository } from "@nihil_backend/user/src/application/interfaces/IUserProfileRepository";
+import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile";
+import { IUserProfileRepository } from "@nihil_backend/user/application/interfaces/IUserProfileRepository";
 const prisma = new PrismaClient();
 
 function parseBirthdate(input: string | Date | undefined): Date | undefined {

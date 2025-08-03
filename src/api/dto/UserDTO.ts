@@ -1,6 +1,6 @@
 // user\src\api\dto\UserDTO.ts
 
-import { User } from "@nihil_backend/root/user/src/core/entities/User";
+import { User } from "@nihil_backend/user/core/entities/User";
 
 export interface UserDTO {
   id: string;

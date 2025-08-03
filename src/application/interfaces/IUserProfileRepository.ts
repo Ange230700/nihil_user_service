@@ -1,6 +1,6 @@
 // user\src\application\interfaces\IUserProfileRepository.ts
 
-import { UserProfile } from "@nihil_backend/root/user/src/core/entities/UserProfile";
+import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile";
 
 export interface IUserProfileRepository {
   /**

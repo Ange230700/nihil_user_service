@@ -1,7 +1,7 @@
 // user\src\application\useCases\UserProfileUseCases.ts
 
-import { UserProfile } from "@nihil_backend/user/src/core/entities/UserProfile";
-import { IUserProfileRepository } from "@nihil_backend/user/src/application/interfaces/IUserProfileRepository";
+import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile";
+import { IUserProfileRepository } from "@nihil_backend/user/application/interfaces/IUserProfileRepository";
 
 export class UserProfileUseCases {
   constructor(private readonly repo: IUserProfileRepository) {}

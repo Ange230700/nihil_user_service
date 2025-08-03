@@ -1,13 +1,13 @@
 // user\src\api\controllers\UserController.ts
 
 import { RequestHandler } from "express";
-import { UserRepository } from "@nihil_backend/root/user/src/infrastructure/repositories/UserRepository";
-import { UserUseCases } from "@nihil_backend/root/user/src/application/useCases/UserUseCases";
+import { UserRepository } from "@nihil_backend/user/infrastructure/repositories/UserRepository";
+import { UserUseCases } from "@nihil_backend/user/application/useCases/UserUseCases";
 import {
   sendSuccess,
   sendError,
-} from "@nihil_backend/user/src/api/helpers/sendResponse";
-import { toUserDTO } from "@nihil_backend/user/src/api/dto";
+} from "@nihil_backend/user/api/helpers/sendResponse";
+import { toUserDTO } from "@nihil_backend/user/api/dto";
 
 export class UserController {
   private readonly repo = new UserRepository();
