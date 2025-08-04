@@ -1,6 +1,6 @@
-// user\src\application\interfaces\IUserProfileRepository.mts
+// user\src\application\interfaces\IUserProfileRepository.ts
 
-import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile";
+import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile.js";
 
 export interface IUserProfileRepository {
   /**

@@ -1,12 +1,12 @@
-// user\src\api\controllers\UserProfileController.mts
+// user\src\api\controllers\UserProfileController.ts
 
 import { RequestHandler } from "express";
-import { UserProfileUseCases } from "@nihil_backend/user/application/useCases/UserProfileUseCases";
+import { UserProfileUseCases } from "@nihil_backend/user/application/useCases/UserProfileUseCases.js";
 import {
   sendSuccess,
   sendError,
-} from "@nihil_backend/user/api/helpers/sendResponse";
-import { UserProfileRepository } from "@nihil_backend/user/infrastructure/repositories/UserProfileRepository";
+} from "@nihil_backend/user/api/helpers/sendResponse.js";
+import { UserProfileRepository } from "@nihil_backend/user/infrastructure/repositories/UserProfileRepository.js";
 
 export class UserProfileController {
   private readonly repo = new UserProfileRepository();

@@ -1,7 +1,7 @@
-// user\src\api\tests\userprofile.crud.spec.mts
+// user\src\api\tests\userprofile.crud.spec.ts
 
 import request from "supertest";
-import app from "@nihil_backend/user/api/config";
+import app from "@nihil_backend/user/api/config.js";
 
 jest.setTimeout(15000);
 const USER_API = "/api/users";

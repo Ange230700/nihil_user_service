@@ -1,12 +1,12 @@
-// user\src\api\router.mts
+// user\src\api\router.ts
 
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import path from "path";
-import { asyncHandler } from "@nihil_backend/user/api/middlewares/asyncHandler";
-import { UserController } from "@nihil_backend/user/api/controllers/UserController";
-import { UserProfileController } from "@nihil_backend/user/api/controllers/UserProfileController";
+import { asyncHandler } from "@nihil_backend/user/api/middlewares/asyncHandler.js";
+import { UserController } from "@nihil_backend/user/api/controllers/UserController.js";
+import { UserProfileController } from "@nihil_backend/user/api/controllers/UserProfileController.js";
 
 const router = express.Router();
 const swaggerDocument = YAML.load(

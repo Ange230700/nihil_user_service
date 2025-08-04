@@ -1,7 +1,7 @@
-// user\src\infrastructure\repositories\UserRepository.mts
+// user\src\infrastructure\repositories\UserRepository.ts
 
-import { User } from "@nihil_backend/user/core/entities/User";
-import { IUserRepository } from "@nihil_backend/user/application/interfaces/IUserRepository";
+import { User } from "@nihil_backend/user/core/entities/User.js";
+import { IUserRepository } from "@nihil_backend/user/application/interfaces/IUserRepository.js";
 import argon2 from "argon2";
 import { PrismaClient } from "nihildbuser/prisma/generated/client/index.js";
 import { PrismaClientKnownRequestError } from "nihildbuser/prisma/generated/client/runtime/library.js";

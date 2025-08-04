@@ -1,6 +1,6 @@
-// user\src\api\server.mts
+// user\src\api\server.ts
 
-import app from "@nihil_backend/user/api/config";
+import app from "@nihil_backend/user/api/config.js";
 
 const PORT = process.env.PORT || 3000;
 

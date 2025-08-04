@@ -1,6 +1,6 @@
-// user\src\api\dto\UserDTO.mts
+// user\src\api\dto\UserDTO.ts
 
-import { User } from "@nihil_backend/user/core/entities/User";
+import { User } from "@nihil_backend/user/core/entities/User.js";
 
 export interface UserDTO {
   id: string;

@@ -1,7 +1,7 @@
-// user\src\application\useCases\UserUseCases.mts
+// user\src\application\useCases\UserUseCases.ts
 
-import { IUserRepository } from "@nihil_backend/user/application/interfaces/IUserRepository";
-import { User } from "@nihil_backend/user/core/entities/User";
+import { IUserRepository } from "@nihil_backend/user/application/interfaces/IUserRepository.js";
+import { User } from "@nihil_backend/user/core/entities/User.js";
 
 export class UserUseCases {
   constructor(private readonly repo: IUserRepository) {}

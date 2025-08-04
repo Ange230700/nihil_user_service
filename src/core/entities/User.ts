@@ -1,4 +1,4 @@
-// user\src\core\entities\User.mts
+// user\src\core\entities\User.ts
 
 export class User {
   constructor(

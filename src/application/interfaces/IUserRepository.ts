@@ -1,6 +1,6 @@
-// user\src\application\interfaces\IUserRepository.mts
+// user\src\application\interfaces\IUserRepository.ts
 
-import { User } from "@nihil_backend/user/core/entities/User";
+import { User } from "@nihil_backend/user/core/entities/User.js";
 
 export interface IUserRepository {
   getAllUsers(): Promise<User[]>;
