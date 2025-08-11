@@ -48,7 +48,7 @@ export class UserController {
         displayName,
         avatarUrl,
       });
-      sendSuccess(res, toUserDTO(created), 200);
+      sendSuccess(res, toUserDTO(created), 201);
     } catch (err: unknown) {
       if (
         typeof err === "object" &&

@@ -24,8 +24,8 @@ app.use(
   }),
 );
 
-app.use(express.json());
-app.use(express.urlencoded());
+app.use(express.json({ limit: "1mb" }));
+app.use(express.urlencoded({ extended: true, limit: "1mb" }));
 app.use(express.text());
 app.use(express.raw());
 
@@ -53,12 +53,5 @@ const logErrors = (
 app.use(logErrors);
 
 /* ************************************************************************* */
-
-if (process.env.NODE_ENV !== "test") {
-  const PORT = process.env.PORT ?? 3000;
-  app.listen(PORT, () => {
-    console.log(`🚀 Server is running on port ${PORT}`);
-  });
-}
 
 export default app;

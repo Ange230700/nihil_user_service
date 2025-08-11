@@ -1,12 +1,10 @@
 // user\src\infrastructure\repositories\UserRepository.ts
 
+import { prisma } from "@nihil_backend/user/infrastructure/prisma.js";
 import { User } from "@nihil_backend/user/core/entities/User.js";
 import { IUserRepository } from "@nihil_backend/user/application/interfaces/IUserRepository.js";
 import argon2 from "argon2";
-import { PrismaClient } from "nihildbuser/prisma/generated/client/index.js";
 import { PrismaClientKnownRequestError } from "nihildbuser/prisma/generated/client/runtime/library.js";
-
-const prisma = new PrismaClient();
 
 export class UserRepository implements IUserRepository {
   async getAllUsers(): Promise<User[]> {

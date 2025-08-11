@@ -1,10 +1,9 @@
 // user\src\infrastructure\repositories\UserProfileRepository.ts
 
-import { PrismaClient } from "nihildbuser/prisma/generated/client/index.js";
+import { prisma } from "@nihil_backend/user/infrastructure/prisma.js";
 import { PrismaClientKnownRequestError } from "nihildbuser/prisma/generated/client/runtime/library.js";
 import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile.js";
 import { IUserProfileRepository } from "@nihil_backend/user/application/interfaces/IUserProfileRepository.js";
-const prisma = new PrismaClient();
 
 function parseBirthdate(input: string | Date | undefined): Date | undefined {
   if (!input) return undefined;

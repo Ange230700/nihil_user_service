@@ -7,6 +7,7 @@ import {
   sendError,
 } from "@nihil_backend/user/api/helpers/sendResponse.js";
 import { UserProfileRepository } from "@nihil_backend/user/infrastructure/repositories/UserProfileRepository.js";
+import { toUserProfileDTO } from "@nihil_backend/user/api/dto/UserProfileDTO.js";
 
 export class UserProfileController {
   private readonly repo = new UserProfileRepository();
@@ -18,7 +19,7 @@ export class UserProfileController {
       if (!userId) return sendError(res, "Missing userId", 400);
       const profile = await this.useCases.getByUserId(userId);
       if (!profile) return sendError(res, "Profile not found", 404);
-      sendSuccess(res, profile, 200);
+      sendSuccess(res, toUserProfileDTO(profile), 200);
     } catch (e) {
       next(e);
     }
@@ -35,7 +36,7 @@ export class UserProfileController {
         birthdate,
         website,
       });
-      sendSuccess(res, profile, 201);
+      sendSuccess(res, toUserProfileDTO(profile), 201);
     } catch (e: unknown) {
       if (
         typeof e === "object" &&
@@ -68,7 +69,7 @@ export class UserProfileController {
         website,
       });
       if (!profile) return sendError(res, "Profile not found", 404);
-      sendSuccess(res, profile, 200);
+      sendSuccess(res, toUserProfileDTO(profile), 200);
     } catch (e: unknown) {
       if (
         typeof e === "object" &&
@@ -81,6 +82,8 @@ export class UserProfileController {
           return sendError(res, "User not found", 404);
         if (msg === "PROFILE_ALREADY_EXISTS")
           return sendError(res, "Profile already exists", 409);
+        if (msg === "INVALID_BIRTHDATE")
+          return sendError(res, "Invalid birthdate format", 400);
       }
       next(e);
     }
