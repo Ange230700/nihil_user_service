@@ -3,7 +3,6 @@
 import request from "supertest";
 import app from "@nihil_backend/user/api/config.js";
 
-jest.setTimeout(15000);
 const USER_API = "/api/users";
 
 describe("UserProfile CRUD API", () => {

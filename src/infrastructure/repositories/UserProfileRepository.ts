@@ -1,9 +1,9 @@
 // user\src\infrastructure\repositories\UserProfileRepository.ts
 
 import { prisma } from "@nihil_backend/user/infrastructure/prisma.js";
-import { PrismaClientKnownRequestError } from "nihildbuser/prisma/generated/client/runtime/library.js";
 import { UserProfile } from "@nihil_backend/user/core/entities/UserProfile.js";
 import { IUserProfileRepository } from "@nihil_backend/user/application/interfaces/IUserProfileRepository.js";
+import { Prisma } from "nihildbuser/prisma/generated/client";
 
 function parseBirthdate(input: string | Date | undefined): Date | undefined {
   if (!input) return undefined;
@@ -69,7 +69,7 @@ export class UserProfileRepository implements IUserProfileRepository {
         p.updatedAt,
       );
     } catch (err: unknown) {
-      if (err instanceof PrismaClientKnownRequestError) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === "P2003") throw new Error("USER_NOT_FOUND");
         if (err.code === "P2002") throw new Error("PROFILE_ALREADY_EXISTS");
       }
@@ -115,7 +115,7 @@ export class UserProfileRepository implements IUserProfileRepository {
         p.updatedAt,
       );
     } catch (err: unknown) {
-      if (err instanceof PrismaClientKnownRequestError) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
         if (err.code === "P2025") return null;
       }
       if (err instanceof Error && err.message === "INVALID_BIRTHDATE") {

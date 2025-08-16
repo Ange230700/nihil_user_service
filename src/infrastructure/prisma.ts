@@ -1,5 +1,5 @@
 // user/src/infrastructure/prisma.ts
-import { PrismaClient } from "nihildbuser/prisma/generated/client/index.js";
+import { PrismaClient } from "nihildbuser/prisma/generated/client";
 
 declare global {
   var __userPrisma: PrismaClient | undefined;
