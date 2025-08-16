@@ -26,7 +26,7 @@ describe("User CRUD API", () => {
   };
 
   it("should create a new user", async () => {
-    const res = await request(app).post(API_PREFIX).send(testUser).expect(200);
+    const res = await request(app).post(API_PREFIX).send(testUser).expect(201);
 
     expect(res.body.status).toBe("success");
     expect(res.body.data).toMatchObject({
