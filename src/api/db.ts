@@ -1,6 +1,6 @@
 // user\src\api\db.ts
 
-import { PrismaClient } from "nihildbpost/prisma/generated/client";
+import { PrismaClient } from "nihildbuser/prisma/generated/client";
 export const prisma: PrismaClient = new PrismaClient();
 
 export async function startDb() {
