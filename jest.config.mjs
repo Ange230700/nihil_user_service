@@ -32,9 +32,11 @@ export default {
   setupFilesAfterEnv: ["<rootDir>/jest.setup.cjs"],
   injectGlobals: true,
 
+  moduleFileExtensions: ["ts", "js", "mjs", "cjs", "json"],
+  modulePathIgnorePatterns: ["<rootDir>/dist/"],
+
   collectCoverageFrom: ["src/**/*.{ts,js}"],
   coverageDirectory: "./coverage",
-  modulePathIgnorePatterns: ["<rootDir>/dist/"],
 
   verbose: true,
 };
