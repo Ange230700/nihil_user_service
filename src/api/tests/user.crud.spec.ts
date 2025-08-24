@@ -2,8 +2,13 @@
 
 import request from "supertest";
 import app from "@nihil_backend/user/api/config.js";
+import { cleanupTestResources } from "./test-utils.js";
 
 const API_PREFIX = "/api/users";
+
+afterAll(async () => {
+  await cleanupTestResources();
+});
 
 describe("User CRUD API", () => {
   let createdUserId: string;
