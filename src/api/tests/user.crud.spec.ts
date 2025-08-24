@@ -2,12 +2,15 @@
 
 import request from "supertest";
 import app from "@nihil_backend/user/api/config.js";
-import { cleanupTestResources } from "./test-utils.js";
+import { startDb, stopDb } from "@nihil_backend/user/api/db.js";
 
 const API_PREFIX = "/api/users";
 
+beforeAll(async () => {
+  await startDb();
+});
 afterAll(async () => {
-  await cleanupTestResources();
+  await stopDb();
 });
 
 describe("User CRUD API", () => {
