@@ -1,31 +1,40 @@
 // user\jest.config.mjs
 
+/** @type {import('jest').Config} */
 export default {
+  // TS + ESM
   preset: "ts-jest/presets/default-esm",
   testEnvironment: "node",
+
   rootDir: ".",
-  testRegex: ".*\\.spec\\.ts$",
+  testMatch: ["**/*.spec.ts"],
+
+  // Tell Jest to treat .ts as ESM
   extensionsToTreatAsEsm: [".ts"],
-  // Only transform TS (avoid double-processing JS)
+
+  // Use ts-jest to transpile TS (ESM output)
   transform: {
     "^.+\\.ts$": [
       "ts-jest",
-      { useESM: true, tsconfig: "<rootDir>/tsconfig.jest.json" },
+      {
+        useESM: true,
+        tsconfig: "<rootDir>/tsconfig.jest.json",
+      },
     ],
   },
-  // 🔒 Single alias — no .js variant
+
+  // Fix ESM ".js" extension rewrites in compiled output
   moduleNameMapper: {
-    "^@nihil_backend/user/(.*)$": "<rootDir>/src/$1", // in user
-    // Map bare ESM-style relative imports produced by TS without adding .js
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@nihil_backend/user/(.*)$": "<rootDir>/src/$1",
   },
-  moduleFileExtensions: ["ts", "js", "json"],
+
   setupFilesAfterEnv: ["<rootDir>/jest.setup.cjs"],
   injectGlobals: true,
-  collectCoverageFrom: ["**/*.{ts,js}"],
+
+  collectCoverageFrom: ["src/**/*.{ts,js}"],
   coverageDirectory: "./coverage",
-  // Prevent Jest from picking compiled output if present
   modulePathIgnorePatterns: ["<rootDir>/dist/"],
-  // Helps ESM resolution with ts-jest
-  resolver: "ts-jest-resolver",
+
+  verbose: true,
 };
