@@ -11,17 +11,22 @@ module.exports = {
   // tell Jest to treat .ts as ESM
   extensionsToTreatAsEsm: [".ts"],
 
+  // Important for Node's ESM test env
+  testEnvironmentOptions: { url: "http://localhost/" },
+
   // compile TS -> ESM
   transform: {
-    "^.+\\.ts$": [
+    "^.+\\.tsx?$": [
       "ts-jest",
       {
         useESM: true,
         tsconfig: "<rootDir>/tsconfig.jest.json",
         diagnostics: false,
+        isolatedModules: true,
       },
     ],
   },
+  transformIgnorePatterns: ["/node_modules/"],
 
   // fix ESM path endings + your path alias
   moduleNameMapper: {
