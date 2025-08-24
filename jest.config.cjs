@@ -26,6 +26,7 @@ module.exports = {
   // fix ESM path endings + your path alias
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
+    "^@nihil_backend/user/(.*)\\.js$": "<rootDir>/src/$1.ts",
     "^@nihil_backend/user/(.*)$": "<rootDir>/src/$1",
   },
 
