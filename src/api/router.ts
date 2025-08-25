@@ -9,6 +9,16 @@ import path from "path";
 import { asyncHandler } from "@nihil_backend/user/api/middlewares/asyncHandler.js";
 import { UserController } from "@nihil_backend/user/api/controllers/UserController.js";
 import { UserProfileController } from "@nihil_backend/user/api/controllers/UserProfileController.js";
+import { AuthController } from "./controllers/AuthController.js";
+import { issueCsrf, requireCsrf } from "@nihil_backend/user/auth/csrf.js";
+import { validate } from "@nihil_backend/user/api/validation/validate.js";
+import {
+  idParamSchema,
+  profileCreateSchema,
+  profileUpdateSchema,
+  userCreateSchema,
+  userUpdateSchema,
+} from "@nihil_backend/user/api/validation/user.schemas.js";
 
 // derive __dirname
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -30,6 +40,8 @@ function resolveSwaggerPath() {
 const router = express.Router();
 const swaggerDocument = YAML.load(resolveSwaggerPath());
 
+const authController = new AuthController();
+
 const userController = new UserController();
 
 const profileController = new UserProfileController();
@@ -37,17 +49,40 @@ const profileController = new UserProfileController();
 // Docs
 router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+router.get("/auth/csrf", issueCsrf, (_req, res) =>
+  res.json({ status: "success", data: null }),
+);
+router.post("/auth/login", asyncHandler(authController.login));
+router.post("/auth/refresh", requireCsrf, asyncHandler(authController.refresh));
+router.post("/auth/logout", requireCsrf, asyncHandler(authController.logout));
+
 router.get("/users", asyncHandler(userController.getAllUsers));
 router.get("/users/:id", asyncHandler(userController.getUserById));
-router.post("/users", asyncHandler(userController.createUser));
-router.put("/users/:id", asyncHandler(userController.updateUser));
+router.post("/users", validate(userCreateSchema));
+router.put(
+  "/users/:id",
+  validate(idParamSchema, ["params"]),
+  validate(userUpdateSchema),
+);
 router.delete("/users/:id", asyncHandler(userController.deleteUser));
 
 router.get(
   "/users/:userId/profile",
   asyncHandler(profileController.getByUserId),
 );
-router.post("/users/:userId/profile", asyncHandler(profileController.create));
-router.put("/users/:userId/profile", asyncHandler(profileController.update));
+router.post(
+  "/users/:userId/profile",
+  validate(idParamSchema.extend({ userId: idParamSchema.shape.id }), [
+    "params",
+  ]),
+  validate(profileCreateSchema),
+);
+router.put(
+  "/users/:userId/profile",
+  validate(idParamSchema.extend({ userId: idParamSchema.shape.id }), [
+    "params",
+  ]),
+  validate(profileUpdateSchema),
+);
 
 export default router;
