@@ -7,7 +7,7 @@ WORKDIR /app
 # --- Deps + Dev toolchain ---
 FROM base AS deps
 ENV NPM_CONFIG_CACHE=/tmp/.npm
-COPY package*.json ./
+COPY user/package*.json ./
 RUN set -eux; \
   if [ -f package-lock.json ]; then \
   npm ci --ignore-scripts --no-optional --no-audit --no-fund; \
@@ -18,16 +18,16 @@ RUN set -eux; \
 # --- Build target workspace ---
 FROM base AS build
 COPY --from=deps /app/node_modules ./node_modules
-COPY package*.json ./
-COPY tsconfig.json tsconfig.json
-COPY src src
-COPY scripts scripts
+COPY user/package*.json ./
+COPY user/tsconfig.json ./tsconfig.json
+COPY user/src ./src
+COPY user/scripts ./scripts
 RUN npm run build
 
 # --- Prod deps only (clean, small) ---
 FROM base AS prod-deps
 ENV NPM_CONFIG_CACHE=/tmp/.npm
-COPY package*.json ./
+COPY user/package*.json ./
 RUN set -eux; \
   if [ -f package-lock.json ]; then \
   npm ci --omit=dev --ignore-scripts --no-optional --no-audit --no-fund; \
@@ -46,14 +46,12 @@ COPY --from=build /app/dist ./dist
 COPY --from=build /app/package.json ./package.json
 COPY --from=prod-deps /app/node_modules ./node_modules
 
-# Merge consecutive RUNs (curl install + package.json normalize + mkdir)
 RUN set -eux; \
   apk add --no-cache curl; \
-  node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('package.json','utf8'));fs.writeFileSync('package.json',JSON.stringify(j, null, 2));"; \
-  mkdir -p ./src/api
+  node -e "const fs=require('fs');const j=JSON.parse(fs.readFileSync('package.json','utf8'));fs.writeFileSync('package.json',JSON.stringify(j, null, 2));"
 
-# Swagger file path expected by your app
-COPY src/api/swagger.yaml ./src/api/swagger.yaml
+# Put swagger with compiled code
+COPY user/src/api/swagger.yaml ./dist/api/swagger.yaml
 
 USER appuser
 EXPOSE 3000
