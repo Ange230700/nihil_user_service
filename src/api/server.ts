@@ -8,8 +8,19 @@ const PORT = process.env.PORT || 3001;
 const server = app.listen(PORT, () => {
   console.log(`🚀 User Service API running on port ${PORT}`);
 });
+
 const shutdown = async () => {
-  await prisma.$disconnect();
-  server.close(() => process.exit(0));
+  try {
+    await prisma.$disconnect();
+  } catch (e) {
+    console.error("Prisma disconnect failed:", e);
+  } finally {
+    server.close(() => process.exit(0));
+  }
 };
-["SIGINT", "SIGTERM"].forEach((sig) => process.on(sig, shutdown));
+
+["SIGINT", "SIGTERM"].forEach((sig) =>
+  process.on(sig, () => {
+    void shutdown();
+  }),
+);

@@ -7,6 +7,61 @@ import argon2 from "argon2";
 import { Prisma } from "nihildbuser/prisma/generated/client";
 
 export class UserRepository implements IUserRepository {
+  async list(options: {
+    limit: number;
+    cursor?: string;
+    userId?: string;
+    q?: string;
+    before?: Date;
+    after?: Date;
+  }): Promise<{ items: User[]; nextCursor: string | null }> {
+    const { limit, cursor, userId, q, before, after } = options;
+
+    const where = {
+      isDeleted: false,
+      ...(userId ? { userId } : {}),
+      ...(q ? { username: { contains: q, mode: "insensitive" } } : {}),
+      ...(before || after
+        ? {
+            createdAt: {
+              ...(before ? { lt: before } : {}),
+              ...(after ? { gt: after } : {}),
+            },
+          }
+        : {}),
+    };
+
+    // Deterministic order; include id for tiebreaker
+    const orderBy = [{ createdAt: "desc" as const }, { id: "desc" as const }];
+
+    const rows = await prisma.user.findMany({
+      where,
+      take: limit + 1,
+      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
+      orderBy,
+    });
+
+    const hasMore = rows.length > limit;
+    if (hasMore) rows.pop(); // remove lookahead
+
+    return {
+      items: rows.map(
+        (u) =>
+          new User(
+            u.id,
+            u.username,
+            u.email,
+            u.passwordHash,
+            u.displayName ?? undefined,
+            u.avatarUrl ?? undefined,
+            u.createdAt,
+            u.updatedAt,
+          ),
+      ),
+      nextCursor: hasMore ? rows[rows.length - 1].id : null,
+    };
+  }
+
   async getAllUsers(): Promise<User[]> {
     const items = await prisma.user.findMany();
     return items.map(

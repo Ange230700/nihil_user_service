@@ -3,6 +3,14 @@
 import { User } from "@nihil_backend/user/core/entities/User.js";
 
 export interface IUserRepository {
+  list(options: {
+    limit: number;
+    cursor?: string;
+    userId?: string;
+    q?: string;
+    before?: Date;
+    after?: Date;
+  }): Promise<{ items: User[]; nextCursor: string | null }>;
   getAllUsers(): Promise<User[]>;
   getUserById(id: string): Promise<User | null>;
   createUser(data: {

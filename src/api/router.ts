@@ -20,6 +20,7 @@ import {
   userCreateSchema,
   userUpdateSchema,
 } from "@nihil_backend/user/api/validation/user.schemas.js";
+import type { OpenAPIV3 } from "openapi-types";
 
 // derive __dirname
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -38,8 +39,39 @@ function resolveSwaggerPath() {
   throw new Error(`swagger.yaml not found. Tried: ${candidates.join(", ")}`);
 }
 
+/** Narrow unknown -> OpenAPI v3 doc */
+function isOpenAPIDocument(x: unknown): x is OpenAPIV3.Document {
+  if (typeof x !== "object" || x === null) return false;
+  // minimal structural checks
+  const o = x as Record<string, unknown>;
+  return (
+    typeof o.openapi === "string" &&
+    typeof o.info === "object" &&
+    o.info !== null
+  );
+}
+
+function loadSwagger(): OpenAPIV3.Document {
+  const file = resolveSwaggerPath();
+  // YAMLJS returns `any`; parse to `unknown`, check, then cast.
+  const parsed = YAML.load(file) as unknown;
+  if (!isOpenAPIDocument(parsed)) {
+    throw new Error("Invalid swagger.yaml: expected an OpenAPI v3 document");
+  }
+  return parsed;
+}
+
+/** Convert to a JsonObject expected by swagger-ui-express (and please ESLint) */
+function toJsonObject(doc: OpenAPIV3.Document): Record<string, unknown> {
+  if (typeof doc !== "object" || doc === null) {
+    throw new Error("Swagger document must be an object");
+  }
+  // If you want to ensure it's plain data (no prototypes), uncomment:
+  // return JSON.parse(JSON.stringify(doc)) as Record<string, unknown>;
+  return doc as unknown as Record<string, unknown>;
+}
+
 const router = express.Router();
-const swaggerDocument = YAML.load(resolveSwaggerPath());
 
 const authController = new AuthController();
 
@@ -48,7 +80,11 @@ const userController = new UserController();
 const profileController = new UserProfileController();
 
 // Docs
-router.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+router.use(
+  "/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(toJsonObject(loadSwagger())),
+);
 
 router.get("/auth/csrf", issueCsrf, (_req, res) =>
   res.json({ status: "success", data: null }),

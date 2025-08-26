@@ -6,6 +6,17 @@ import { User } from "@nihil_backend/user/core/entities/User.js";
 export class UserUseCases {
   constructor(private readonly repo: IUserRepository) {}
 
+  list(options: {
+    limit: number;
+    cursor?: string;
+    userId?: string;
+    q?: string;
+    before?: Date;
+    after?: Date;
+  }): Promise<{ items: User[]; nextCursor: string | null }> {
+    return this.repo.list(options);
+  }
+
   async getAllUsers(): Promise<User[]> {
     return this.repo.getAllUsers();
   }

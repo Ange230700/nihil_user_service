@@ -14,8 +14,33 @@ import {
 } from "@nihil_backend/user/auth/jwt.js";
 import { refreshCookieOpts } from "@nihil_backend/user/auth/cookies.js";
 
+// ---------- helpers to avoid `any` from cookies ----------
+function readCookie(
+  req: { cookies?: unknown },
+  name: string,
+): string | undefined {
+  const bag = req.cookies;
+  if (typeof bag !== "object" || bag === null) return undefined;
+  const val = (bag as Record<string, unknown>)[name];
+  return typeof val === "string" ? val : undefined;
+}
+
+// ---------- typed bodies ----------
+type LoginBody = {
+  email: string;
+  password: string;
+};
+
+type LoginResponse = {
+  accessToken: string;
+};
+
 export class AuthController {
-  login: RequestHandler = async (req, res) => {
+  login: RequestHandler<
+    unknown,
+    LoginResponse | { message: string },
+    LoginBody
+  > = async (req, res) => {
     const { email, password } = req.body;
     if (!email || !password) return sendError(res, "Missing credentials", 400);
     const user = await prisma.user.findUnique({
@@ -32,8 +57,8 @@ export class AuthController {
     return sendSuccess(res, { accessToken: access }, 200);
   };
 
-  refresh: RequestHandler = async (req, res) => {
-    const token = req.cookies?.["refresh_token"];
+  refresh: RequestHandler = (req, res) => {
+    const token = readCookie(req, "refresh_token");
     if (!token) return sendError(res, "No refresh", 401);
     try {
       const payload = verifyRefresh(token);
@@ -49,7 +74,7 @@ export class AuthController {
     }
   };
 
-  logout: RequestHandler = async (_req, res) => {
+  logout: RequestHandler = (_req, res) => {
     res.clearCookie("refresh_token", { ...refreshCookieOpts });
     return sendSuccess(res, null, 200);
   };

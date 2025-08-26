@@ -1,13 +1,24 @@
 // user\src\api\controllers\UserController.ts
 
 import { RequestHandler } from "express";
-import { UserRepository } from "@nihil_backend/user/infrastructure/repositories/UserRepository.js";
+import type { z } from "zod";
 import { UserUseCases } from "@nihil_backend/user/application/useCases/UserUseCases.js";
 import {
   sendSuccess,
   sendError,
 } from "@nihil_backend/user/api/helpers/sendResponse.js";
+import { UserRepository } from "@nihil_backend/user/infrastructure/repositories/UserRepository.js";
 import { toUserDTO } from "@nihil_backend/user/api/dto/index.js";
+import {
+  userCreateSchema,
+  userUpdateSchema,
+} from "@nihil_backend/user/api/validation/user.schemas.js";
+import { listQuerySchema } from "@nihil_backend/user/api/validation/user.query.js";
+
+// Types for params & bodies
+type UserIdParams = { id: string };
+type UserCreateBody = z.infer<typeof userCreateSchema>;
+type UserUpdateBody = z.infer<typeof userUpdateSchema>;
 
 export class UserController {
   private readonly repo = new UserRepository();
@@ -15,8 +26,26 @@ export class UserController {
 
   getAllUsers: RequestHandler = async (req, res, next) => {
     try {
-      const items = await this.useCases.getAllUsers();
-      sendSuccess(res, items.map(toUserDTO), 200);
+      // req.query is already validated/parsed by zod via validate()
+      const parsed = listQuerySchema.parse(req.query);
+      const limit = parsed.limit ?? 20;
+      const { items, nextCursor } = await this.useCases.list({
+        limit,
+        cursor: parsed.cursor,
+        q: parsed.q,
+        before: parsed.before ? new Date(parsed.before) : undefined,
+        after: parsed.after ? new Date(parsed.after) : undefined,
+      });
+
+      sendSuccess(
+        res,
+        {
+          items: items.map(toUserDTO),
+          nextCursor,
+          limit,
+        },
+        200,
+      );
     } catch (err) {
       next(err);
     }
@@ -35,7 +64,11 @@ export class UserController {
     }
   };
 
-  createUser: RequestHandler = async (req, res, next) => {
+  createUser: RequestHandler<UserIdParams, unknown, UserCreateBody> = async (
+    req,
+    res,
+    next,
+  ) => {
     const { username, email, password, displayName, avatarUrl } = req.body;
     if (!username || !email || !password) {
       return sendError(res, "Missing required fields", 400);
@@ -64,7 +97,11 @@ export class UserController {
     }
   };
 
-  updateUser: RequestHandler = async (req, res, next) => {
+  updateUser: RequestHandler<UserIdParams, unknown, UserUpdateBody> = async (
+    req,
+    res,
+    next,
+  ) => {
     const id = req.params.id;
     if (!id) return sendError(res, "Invalid id", 400);
 
