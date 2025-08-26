@@ -97,13 +97,13 @@ router.get("/users", asyncHandler(userController.getAllUsers));
 router.get("/users/:id", asyncHandler(userController.getUserById));
 router.post(
   "/users",
-  validate(userCreateSchema, ["body"]),
+  validate(userCreateSchema),
   asyncHandler(userController.createUser),
 );
 router.put(
   "/users/:id",
-  validate(idParamSchema, ["params"]),
-  validate(userUpdateSchema, ["body"]),
+  validate(idParamSchema, "params"),
+  validate(userUpdateSchema),
   asyncHandler(userController.updateUser),
 );
 router.delete("/users/:id", asyncHandler(userController.deleteUser));
@@ -114,14 +114,14 @@ router.get(
 );
 router.post(
   "/users/:userId/profile",
-  validate(userIdParamSchema, ["params"]),
-  validate(profileCreateSchema, ["body"]),
+  validate(userIdParamSchema, "params"),
+  validate(profileCreateSchema),
   asyncHandler(profileController.create),
 );
 router.put(
   "/users/:userId/profile",
-  validate(userIdParamSchema, ["params"]),
-  validate(profileUpdateSchema, ["body"]),
+  validate(userIdParamSchema, "params"),
+  validate(profileUpdateSchema),
   asyncHandler(profileController.update),
 );
 
