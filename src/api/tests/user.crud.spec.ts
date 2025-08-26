@@ -61,18 +61,20 @@ afterAll(async () => {
 describe("User CRUD API", () => {
   let createdUserId = "";
 
+  const uniq = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
   // Helper data for test user
   const testUser = {
-    username: "testuser_" + Date.now(),
-    email: `test_${Date.now()}@example.com`,
+    username: `testuser_${uniq}`,
+    email: `test_${uniq}@example.com`,
     password: "TestPassword123!",
     displayName: "Test User",
     avatarUrl: "https://cdn.example.com/test_avatar.png",
   };
 
   const updatedData = {
-    username: "updated_" + Date.now(),
-    email: `updated_${Date.now()}@example.com`,
+    username: `updated_${uniq}`,
+    email: `updated_${uniq}@example.com`,
     password: "UpdatedPassword456!",
     displayName: "Updated User",
     avatarUrl: "https://cdn.example.com/updated_avatar.png",

@@ -18,7 +18,6 @@ export class UserRepository implements IUserRepository {
     const { limit, cursor, userId, q, before, after } = options;
 
     const where = {
-      isDeleted: false,
       ...(userId ? { userId } : {}),
       ...(q ? { username: { contains: q, mode: "insensitive" } } : {}),
       ...(before || after

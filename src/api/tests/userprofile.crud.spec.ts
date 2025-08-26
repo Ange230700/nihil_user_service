@@ -67,12 +67,14 @@ afterAll(async () => {
 describe("UserProfile CRUD API", () => {
   let userId = "";
 
+  const uniq = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+
   beforeAll(async () => {
     const res = await request(app)
       .post("/api/users")
       .send({
-        username: "profileuser_" + Date.now(),
-        email: "profileuser_" + Date.now() + "@example.com",
+        username: `profileuser_${uniq}`,
+        email: `profileuser_${uniq}@example.com`,
         password: "TestPassword123!",
         displayName: "Profile User",
         avatarUrl: "https://cdn.example.com/profile_avatar.png",
