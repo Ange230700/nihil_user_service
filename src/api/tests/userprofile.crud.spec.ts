@@ -29,13 +29,30 @@ function expectSuccessData<D>(res: { body: unknown }, schema: z.ZodType<D>): D {
   return parsed.data.data;
 }
 
+// RFC 4122 UUID v1–v5 (case-insensitive)
+const uuidRE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const idSchema = z.string().regex(uuidRE, "Invalid UUID");
+// RFC 5322-ish email check using new helper
+const emailSchema = z
+  .string()
+  .transform((e) => e.toLowerCase().trim())
+  .pipe(z.email());
+
+// helpers (put near your other schema helpers)
+const urlSchema = z
+  .string()
+  .transform((s) => s.trim())
+  .pipe(z.url());
+
 // Schemas for the parts we assert in tests
 const UserDTO = z.object({
-  id: z.string().uuid(),
+  id: idSchema,
   username: z.string(),
-  email: z.string().email(),
+  email: emailSchema,
   displayName: z.string().optional(),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: urlSchema.optional(),
 });
 
 /**
@@ -43,7 +60,7 @@ const UserDTO = z.object({
  * birthdate can be string or null (API may omit or keep previous value).
  */
 const ProfileDTO = z.object({
-  userId: z.string().uuid(),
+  userId: idSchema,
   bio: z.string().nullable().optional(),
   location: z.string().nullable().optional(),
   birthdate: z.string().nullable().optional(),

@@ -29,17 +29,32 @@ function expectSuccessData<D>(res: { body: unknown }, schema: z.ZodType<D>): D {
 
 /* --------------------- Minimal schemas used in asserts --------------------- */
 
+// RFC 4122 UUID v1–v5 (case-insensitive)
+const uuidRE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+const idSchema = z.string().regex(uuidRE, "Invalid UUID");
+// RFC 5322-ish email check using new helper
+const emailSchema = z
+  .string()
+  .transform((e) => e.toLowerCase().trim())
+  .pipe(z.email());
+// helpers (put near your other schema helpers)
+const urlSchema = z
+  .string()
+  .transform((s) => s.trim())
+  .pipe(z.url());
 // What we read back for a user when creating/updating/getting by id
 const UserShape = z.object({
-  id: z.string().uuid(),
+  id: idSchema,
   username: z.string(),
-  email: z.string().email(),
+  email: emailSchema,
   displayName: z.string().nullable().optional(),
-  avatarUrl: z.string().url().nullable().optional(),
+  avatarUrl: urlSchema.nullable().optional(),
 });
 
 // For list view we only need the id field to check containment
-const UserIdOnly = z.object({ id: z.string().uuid() });
+const UserIdOnly = z.object({ id: idSchema });
 const UserList = z.array(UserIdOnly);
 
 /* --------------------------------- Constants --------------------------------- */
