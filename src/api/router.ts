@@ -14,6 +14,7 @@ import { issueCsrf, requireCsrf } from "@nihil_backend/user/auth/csrf.js";
 import { validate } from "@nihil_backend/user/api/validation/validate.js";
 import {
   idParamSchema,
+  userIdParamSchema,
   profileCreateSchema,
   profileUpdateSchema,
   userCreateSchema,
@@ -58,11 +59,16 @@ router.post("/auth/logout", requireCsrf, asyncHandler(authController.logout));
 
 router.get("/users", asyncHandler(userController.getAllUsers));
 router.get("/users/:id", asyncHandler(userController.getUserById));
-router.post("/users", validate(userCreateSchema));
+router.post(
+  "/users",
+  validate(userCreateSchema),
+  asyncHandler(userController.createUser),
+);
 router.put(
   "/users/:id",
   validate(idParamSchema, ["params"]),
   validate(userUpdateSchema),
+  asyncHandler(userController.updateUser),
 );
 router.delete("/users/:id", asyncHandler(userController.deleteUser));
 
@@ -72,17 +78,15 @@ router.get(
 );
 router.post(
   "/users/:userId/profile",
-  validate(idParamSchema.extend({ userId: idParamSchema.shape.id }), [
-    "params",
-  ]),
+  validate(userIdParamSchema, ["params"]),
   validate(profileCreateSchema),
+  asyncHandler(profileController.create),
 );
 router.put(
   "/users/:userId/profile",
-  validate(idParamSchema.extend({ userId: idParamSchema.shape.id }), [
-    "params",
-  ]),
+  validate(userIdParamSchema, ["params"]),
   validate(profileUpdateSchema),
+  asyncHandler(profileController.update),
 );
 
 export default router;

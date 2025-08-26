@@ -19,6 +19,7 @@ export const userCreateSchema = z.object({
 export const userUpdateSchema = userCreateSchema.partial();
 
 export const idParamSchema = z.object({ id: z.string().uuid() });
+export const userIdParamSchema = z.object({ userId: z.string().uuid() });
 
 export const profileCreateSchema = z.object({
   bio: z.string().max(280).optional(),
@@ -26,4 +27,4 @@ export const profileCreateSchema = z.object({
   birthdate: z.string().date().optional(), // accepts 'YYYY-MM-DD'
   website: z.string().url().optional(),
 });
-export const profileUpdateSchema = profileCreateSchema; // same shape
+export const profileUpdateSchema = profileCreateSchema;

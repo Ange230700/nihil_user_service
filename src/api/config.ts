@@ -8,6 +8,7 @@ import router from "@nihil_backend/user/api/router.js";
 import { sendError } from "@nihil_backend/user/api/helpers/sendResponse.js";
 import { buildCors } from "@nihil_backend/user/api/security/cors.js";
 import { securityMiddleware } from "@nihil_backend/user/api/security/index.js";
+import { ZodError } from "zod";
 
 const app = express();
 
@@ -32,6 +33,9 @@ const logErrors = (
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   next: NextFunction,
 ) => {
+  if (err instanceof ZodError) {
+    return sendError(res, "Validation failed", 400, err.issues);
+  }
   console.error("🔴 API ERROR", err);
   sendError(res, err.message || "Internal Server Error", 500, err);
 };

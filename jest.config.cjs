@@ -22,7 +22,6 @@ module.exports = {
         useESM: true,
         tsconfig: "<rootDir>/tsconfig.jest.json",
         diagnostics: false,
-        isolatedModules: true,
       },
     ],
   },
