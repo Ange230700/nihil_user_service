@@ -34,15 +34,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug paths
-        run: |
-          echo "Current directory:"
-          pwd
-          echo "Root contents:"
-          ls -la
-          echo "Where is package-lock?"
-          (ls -la package-lock.json && echo "Found at repo root") || (find . -maxdepth 3 -name package-lock.json -print)
-
       - name: Use Node 20 LTS
         uses: actions/setup-node@v4
         with:
