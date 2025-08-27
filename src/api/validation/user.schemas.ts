@@ -3,8 +3,14 @@ import { z } from "zod";
 
 const emailSchema = z
   .string()
-  .email()
-  .transform((e) => e.toLowerCase().trim());
+  .transform((e) => e.toLowerCase().trim())
+  .pipe(z.email());
+
+// Normalize/trim URL before validating
+const urlSchema = z
+  .string()
+  .transform((s) => s.trim())
+  .pipe(z.url());
 
 export const userCreateSchema = z.object({
   username: z
@@ -15,7 +21,7 @@ export const userCreateSchema = z.object({
   email: emailSchema,
   password: z.string().min(8).max(128),
   displayName: z.string().min(1).max(80).optional(),
-  avatarUrl: z.string().url().optional(),
+  avatarUrl: urlSchema.optional(),
 });
 
 export const userUpdateSchema = userCreateSchema.partial();
@@ -30,6 +36,6 @@ export const profileCreateSchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(), // accepts 'YYYY-MM-DD'
-  website: z.string().url().optional(),
+  website: urlSchema.optional(),
 });
 export const profileUpdateSchema = profileCreateSchema;

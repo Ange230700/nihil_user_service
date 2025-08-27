@@ -26,6 +26,11 @@ export function validate<T extends z.ZodTypeAny>(
           ? zMaybe.treeifyError(parsed.error)
           : ({ issues: parsed.error.issues } as const);
 
+      console.error("[VALIDATION FAIL]", {
+        loc,
+        issues: parsed.error.issues,
+        data,
+      });
       return sendError(res, "Validation failed", 400, details);
     }
 
