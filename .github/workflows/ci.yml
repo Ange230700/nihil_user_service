@@ -12,6 +12,10 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: user
+
     env:
       NODE_ENV: test
       MYSQL_ROOT_PASSWORD: root
@@ -39,6 +43,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: user/package-lock.json
 
       - name: Install deps
         run: npm ci
