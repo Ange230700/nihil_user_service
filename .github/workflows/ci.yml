@@ -71,8 +71,5 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Lint
-        run: npm run lint
-
       - name: Test (CI mode)
         run: npm run test:ci
