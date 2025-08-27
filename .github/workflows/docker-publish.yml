@@ -7,6 +7,13 @@ on:
     branches: [main]
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      clear_cache:
+        description: "Force clear Buildx cache for this run"
+        type: boolean
+        default: false
+        required: false
 
 jobs:
   docker:
@@ -14,6 +21,11 @@ jobs:
     permissions:
       contents: read
       packages: write
+
+    env:
+      # Default cache scope is the branch; if clear_cache is true,
+      # append run_id to create a fresh, unique cache namespace.
+      CACHE_SCOPE: ${{ inputs.clear_cache && format('{0}-{1}', github.ref_name, github.run_id) || github.ref_name }}
 
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +53,11 @@ jobs:
             type=ref,event=branch
             type=semver,pattern={{version}}
 
+      # Optional: also wipe the local Buildx cache on this runner when requested
+      - name: Prune local Buildx cache (on-demand)
+        if: ${{ inputs.clear_cache == true }}
+        run: docker buildx prune --all --force
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -50,3 +67,5 @@ jobs:
           platforms: linux/amd64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ env.CACHE_SCOPE }}
+          cache-to: type=gha,mode=max,scope=${{ env.CACHE_SCOPE }}
