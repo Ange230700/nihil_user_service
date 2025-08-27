@@ -80,7 +80,7 @@ export class UserController {
     }
   };
 
-  createUser: RequestHandler<UserIdParams, unknown, UserCreateBody> = async (
+  createUser: RequestHandler<unknown, unknown, UserCreateBody> = async (
     req,
     res,
     next,
