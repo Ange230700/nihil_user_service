@@ -1,4 +1,4 @@
-# user\.github\workflows\ci.yml
+# user/.github/workflows/ci.yml
 
 name: Service CI
 
@@ -11,26 +11,21 @@ on:
 jobs:
   ci:
     runs-on: ubuntu-latest
+
+    env:
+      NODE_ENV: test
+      USER_DATABASE_URL: mysql://root:root@127.0.0.1:3330/app_db
+
     services:
       mysql:
         image: mysql:8.3
-        env:
-          MYSQL_DATABASE: app_db
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          MYSQL_USER: ${{ secrets.MYSQL_USER }}
-          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
         ports:
           - 3330:3306
         options: >-
-          --health-cmd="mysqladmin ping --silent"
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -p${MYSQL_ROOT_PASSWORD} --silent"
           --health-interval=10s
           --health-timeout=5s
-          --health-retries=5
-
-    env:
-      USER_DATABASE_URL: mysql://root:${{ secrets.MYSQL_ROOT_PASSWORD }}@127.0.0.1:3330/app_db
-      NODE_ENV: test
-      PORT: 3000
+          --health-retries=10
 
     steps:
       - uses: actions/checkout@v4
@@ -39,13 +34,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: "npm"
+          cache: npm
 
       - name: Install deps
         run: npm ci
 
       - name: Prisma generate (native engines)
         run: npm run prisma:generate
+
+      - name: Wait for MySQL to be ready
+        run: |
+          for i in {1..30}; do
+            if mysqladmin ping -h 127.0.0.1 -P 3330 -uroot -p"${MYSQL_ROOT_PASSWORD}" --silent; then
+              echo "MySQL is up"; break
+            fi
+            echo "Waiting for MySQL ($i/30)"; sleep 2
+          done
 
       - name: Reset DB and apply migrations
         run: node ./scripts/prisma.mjs migrate reset --force --skip-seed
