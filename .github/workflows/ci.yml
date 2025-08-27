@@ -12,10 +12,6 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: ./user
-
     env:
       NODE_ENV: test
       MYSQL_ROOT_PASSWORD: root
@@ -44,15 +40,15 @@ jobs:
           pwd
           echo "Root contents:"
           ls -la
-          echo "User service contents:"
-          ls -la user || true
+          echo "Where is package-lock?"
+          (ls -la package-lock.json && echo "Found at repo root") || (find . -maxdepth 3 -name package-lock.json -print)
 
       - name: Use Node 20 LTS
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
-          cache-dependency-path: user/package-lock.json
+          cache-dependency-path: package-lock.json
 
       - name: Install deps
         run: npm ci
