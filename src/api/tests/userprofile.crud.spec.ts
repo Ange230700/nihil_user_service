@@ -85,12 +85,14 @@ describe("UserProfile CRUD API", () => {
   let userId = "";
 
   const uniq = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+  // Keep username within the schema's 30-char limit
+  const username = `profileuser_${uniq.slice(0, 30)}`;
 
   beforeAll(async () => {
     const res = await request(app)
       .post("/api/users")
       .send({
-        username: `profileuser_${uniq}`,
+        username,
         email: `profileuser_${uniq}@example.com`,
         password: "TestPassword123!",
         displayName: "Profile User",
