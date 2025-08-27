@@ -20,6 +20,7 @@ import {
   userCreateSchema,
   userUpdateSchema,
 } from "@nihil_backend/user/api/validation/user.schemas.js";
+import { listQuerySchema } from "@nihil_backend/user/api/validation/user.query.js";
 import type { OpenAPIV3 } from "openapi-types";
 
 // derive __dirname
@@ -93,7 +94,11 @@ router.post("/auth/login", asyncHandler(authController.login));
 router.post("/auth/refresh", requireCsrf, asyncHandler(authController.refresh));
 router.post("/auth/logout", requireCsrf, asyncHandler(authController.logout));
 
-router.get("/users", asyncHandler(userController.getAllUsers));
+router.get(
+  "/users",
+  validate(listQuerySchema, "query"),
+  asyncHandler(userController.getAllUsers),
+);
 router.get("/users/:id", asyncHandler(userController.getUserById));
 router.post(
   "/users",

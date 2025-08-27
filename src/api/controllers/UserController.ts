@@ -13,7 +13,6 @@ import {
   userCreateSchema,
   userUpdateSchema,
 } from "@nihil_backend/user/api/validation/user.schemas.js";
-import { listQuerySchema } from "@nihil_backend/user/api/validation/user.query.js";
 
 // Types for params & bodies
 type UserIdParams = { id: string };
@@ -26,24 +25,41 @@ export class UserController {
 
   getAllUsers: RequestHandler = async (req, res, next) => {
     try {
-      // req.query is already validated/parsed by zod via validate()
-      const parsed = listQuerySchema.parse(req.query);
-      const limit = parsed.limit ?? 20;
+      // Treat *presence of a real query string* as the signal for paginated mode
+      const hadQueryString =
+        typeof req.originalUrl === "string" && req.originalUrl.includes("?");
+
+      if (!hadQueryString) {
+        // Legacy behavior: return a plain array (tests expect this)
+        const users = await this.useCases.getAllUsers();
+        return sendSuccess(res, users.map(toUserDTO), 200);
+      }
+
+      // Paginated behavior when query string is present.
+      // `validate(listQuerySchema, "query")` already parsed & sanitized req.query, but we'll read defensively.
+      const q = req.query as unknown as {
+        limit?: number;
+        cursor?: string;
+        q?: string;
+        userId?: string;
+        before?: string;
+        after?: string;
+      };
+
+      const limit = typeof q.limit === "number" ? q.limit : 20;
+
       const { items, nextCursor } = await this.useCases.list({
         limit,
-        cursor: parsed.cursor,
-        q: parsed.q,
-        before: parsed.before ? new Date(parsed.before) : undefined,
-        after: parsed.after ? new Date(parsed.after) : undefined,
+        cursor: typeof q.cursor === "string" ? q.cursor : undefined,
+        q: typeof q.q === "string" ? q.q : undefined,
+        userId: typeof q.userId === "string" ? q.userId : undefined,
+        before: typeof q.before === "string" ? new Date(q.before) : undefined,
+        after: typeof q.after === "string" ? new Date(q.after) : undefined,
       });
 
-      sendSuccess(
+      return sendSuccess(
         res,
-        {
-          items: items.map(toUserDTO),
-          nextCursor,
-          limit,
-        },
+        { items: items.map(toUserDTO), nextCursor, limit },
         200,
       );
     } catch (err) {
