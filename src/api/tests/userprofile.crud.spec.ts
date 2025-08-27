@@ -86,7 +86,10 @@ describe("UserProfile CRUD API", () => {
 
   const uniq = `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
   // Keep username within the schema's 30-char limit
-  const username = `profileuser_${uniq.slice(0, 30)}`;
+  const base = "profileuser_";
+  const MAX = 30;
+  const suffix = uniq.slice(0, MAX - base.length);
+  const username = `${base}${suffix}`;
 
   beforeAll(async () => {
     const res = await request(app)
