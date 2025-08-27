@@ -26,6 +26,19 @@ import type { OpenAPIV3 } from "openapi-types";
 // derive __dirname
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+// Run query validation only if a query string is present.
+// This preserves legacy behavior for plain GET /api/users (no '?')
+const validateUsersListQueryIfPresent: express.RequestHandler = (
+  req,
+  res,
+  next,
+) => {
+  if (typeof req.originalUrl === "string" && req.originalUrl.includes("?")) {
+    return validate(listQuerySchema, "query")(req, res, next);
+  }
+  next();
+};
+
 function resolveSwaggerPath() {
   const candidates = [
     process.env.SWAGGER_PATH, // explicit override
@@ -96,7 +109,7 @@ router.post("/auth/logout", requireCsrf, asyncHandler(authController.logout));
 
 router.get(
   "/users",
-  validate(listQuerySchema, "query"),
+  validateUsersListQueryIfPresent,
   asyncHandler(userController.getAllUsers),
 );
 router.get("/users/:id", asyncHandler(userController.getUserById));
