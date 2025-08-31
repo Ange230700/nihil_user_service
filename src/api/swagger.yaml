@@ -284,7 +284,6 @@ components:
           type: string
           format: uri
       description: Partial update; all fields optional.
-
       allOf:
         - $ref: "#/components/schemas/UserCreate"
 
@@ -312,12 +311,16 @@ components:
       allOf:
         - $ref: "#/components/schemas/UserProfileCreate"
 
+security:
+  - BearerAuth: []
+
 paths:
   /auth/csrf:
     get:
       tags: [Auth]
       summary: Issue CSRF cookie & header token (double-submit)
       description: Returns a CSRF token and sets a CSRF cookie. Use the token as `x-csrf-token` header for state-changing endpoints.
+      security: [] # Public override
       responses:
         "200":
           description: CSRF token issued
@@ -340,6 +343,7 @@ paths:
     post:
       tags: [Auth]
       summary: Login with email & password
+      security: [] # Public override
       requestBody:
         required: true
         content:
@@ -441,13 +445,6 @@ paths:
         - $ref: "#/components/parameters/BeforeParam"
         - $ref: "#/components/parameters/AfterParam"
         - $ref: "#/components/parameters/UserIdParamQuery"
-        - $ref: "#/components/parameters/LimitParam"
-        - $ref: "#/components/parameters/CursorParam"
-        - $ref: "#/components/parameters/QParam"
-        - $ref: "#/components/parameters/BeforeParam"
-        - $ref: "#/components/parameters/AfterParam"
-      security:
-        - BearerAuth: []
       responses:
         "200":
           description: List of users
@@ -470,8 +467,6 @@ paths:
     post:
       tags: [Users]
       summary: Create a user
-      security:
-        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -502,8 +497,6 @@ paths:
     get:
       tags: [Users]
       summary: Get user by ID
-      security:
-        - BearerAuth: []
       parameters:
         - in: path
           name: id
@@ -533,8 +526,6 @@ paths:
     put:
       tags: [Users]
       summary: Update user by ID
-      security:
-        - BearerAuth: []
       parameters:
         - in: path
           name: id
@@ -570,8 +561,6 @@ paths:
     delete:
       tags: [Users]
       summary: Delete user by ID
-      security:
-        - BearerAuth: []
       parameters:
         - in: path
           name: id
@@ -604,8 +593,6 @@ paths:
     get:
       tags: [User Profiles]
       summary: Get user profile by user ID
-      security:
-        - BearerAuth: []
       parameters:
         - in: path
           name: userId
@@ -635,8 +622,6 @@ paths:
     post:
       tags: [User Profiles]
       summary: Create a user profile
-      security:
-        - BearerAuth: []
       parameters:
         - in: path
           name: userId
@@ -672,8 +657,6 @@ paths:
     put:
       tags: [User Profiles]
       summary: Update user profile by user ID
-      security:
-        - BearerAuth: []
       parameters:
         - in: path
           name: userId
