@@ -1,5 +1,3 @@
-# user\src\api\swagger.yaml
-
 openapi: 3.0.3
 info:
   title: Nihil User Service API
@@ -48,6 +46,7 @@ components:
       name: cursor
       schema:
         type: string
+      example: "eyJpZCI6IjQwY2YyMy..."
       description: Cursor for forward pagination.
     LimitParam:
       in: query
@@ -57,6 +56,7 @@ components:
         minimum: 1
         maximum: 100
         default: 30
+      example: 30
       description: Page size (1–100).
     QParam:
       in: query
@@ -65,21 +65,32 @@ components:
         type: string
         minLength: 1
         maxLength: 80
+      example: "john"
       description: Case-insensitive search on username/email/displayName.
     BeforeParam:
       in: query
       name: before
       schema:
         type: string
-        pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+        pattern: '^\d{4}-\d{2}-\d{2}$'
+      example: "2025-08-01"
       description: ISO date `YYYY-MM-DD` — return items created **before** this date.
     AfterParam:
       in: query
       name: after
       schema:
         type: string
-        pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+        pattern: '^\d{4}-\d{2}-\d{2}$'
+      example: "2024-01-01"
       description: ISO date `YYYY-MM-DD` — return items created **after** this date.
+    UserIdParamQuery:
+      in: query
+      name: userId
+      schema:
+        type: string
+        format: uuid
+      example: "40cf2348-d871-11ee-8a82-0242ac110002"
+      description: Filter by user id.
 
   schemas:
     ApiResponse:
@@ -123,10 +134,12 @@ components:
         email:
           type: string
           format: email
+          example: johndoe@example.com
         password:
           type: string
           minLength: 8
           maxLength: 128
+          example: S3cureP@ss!
 
     LoginResponse:
       type: object
@@ -162,6 +175,9 @@ components:
           example: 40cf2348-d871-11ee-8a82-0242ac110002
         username:
           type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-zA-Z0-9._-]+$"
           example: johndoe
         email:
           type: string
@@ -229,6 +245,32 @@ components:
           minLength: 3
           maxLength: 30
           pattern: "^[a-zA-Z0-9._-]+$"
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+          example: S3cureP@ss!
+        displayName:
+          type: string
+          example: John Doe
+        avatarUrl:
+          type: string
+          format: uri
+          example: https://cdn.example.com/avatar.png
+
+    UserUpdate:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-zA-Z0-9._-]+$"
         email:
           type: string
           format: email
@@ -241,11 +283,10 @@ components:
         avatarUrl:
           type: string
           format: uri
+      description: Partial update; all fields optional.
 
-    UserUpdate:
       allOf:
         - $ref: "#/components/schemas/UserCreate"
-      description: Partial update; all fields optional.
 
     UserProfileCreate:
       type: object
@@ -253,15 +294,19 @@ components:
         bio:
           type: string
           maxLength: 280
+          example: "Full-stack developer. Love TypeScript and cats."
         location:
           type: string
           maxLength: 80
+          example: "Paris, France"
         birthdate:
           type: string
           format: date
+          example: "1998-06-21"
         website:
           type: string
           format: uri
+          example: "https://angekouakou.dev"
 
     UserProfileUpdate:
       allOf:
@@ -390,6 +435,12 @@ paths:
       tags: [Users]
       summary: Get all users (paginated)
       parameters:
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/QParam"
+        - $ref: "#/components/parameters/BeforeParam"
+        - $ref: "#/components/parameters/AfterParam"
+        - $ref: "#/components/parameters/UserIdParamQuery"
         - $ref: "#/components/parameters/LimitParam"
         - $ref: "#/components/parameters/CursorParam"
         - $ref: "#/components/parameters/QParam"
