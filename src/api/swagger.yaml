@@ -5,23 +5,398 @@ info:
   title: Nihil User Service API
   description: |
     REST API for user management, part of the Nihil microservices platform.
-    [View the full monorepo on GitHub](https://github.com/Ange230700/nihil_databases)
-  version: "1.0.0"
+    This spec documents authentication (JWT + refresh rotation with CSRF), users, and user profiles.
+  version: "1.1.0"
 servers:
   - url: http://localhost:3001/api
     description: Local dev server
+  - url: https://user.api.nihil.dev/api
+    description: Production (example)
 
 tags:
+  - name: Auth
+    description: Authentication and session endpoints
   - name: Users
     description: User CRUD operations
   - name: User Profiles
     description: User profile CRUD operations
 
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        Access token signed with RS256. Include as `Authorization: Bearer <token>`.
+    CsrfHeader:
+      type: apiKey
+      in: header
+      name: x-csrf-token
+      description: |
+        CSRF token for **state-changing** endpoints that rely on cookies.
+        Obtain it from `GET /auth/csrf` (double-submit cookie + header).
+    RefreshCookie:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+      description: HttpOnly cookie set on login and rotated on refresh.
+
+  parameters:
+    CursorParam:
+      in: query
+      name: cursor
+      schema:
+        type: string
+      description: Cursor for forward pagination.
+    LimitParam:
+      in: query
+      name: limit
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 30
+      description: Page size (1–100).
+    QParam:
+      in: query
+      name: q
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 80
+      description: Case-insensitive search on username/email/displayName.
+    BeforeParam:
+      in: query
+      name: before
+      schema:
+        type: string
+        pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+      description: ISO date `YYYY-MM-DD` — return items created **before** this date.
+    AfterParam:
+      in: query
+      name: after
+      schema:
+        type: string
+        pattern: '^\\d{4}-\\d{2}-\\d{2}$'
+      description: ISO date `YYYY-MM-DD` — return items created **after** this date.
+
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [success, error]
+        data:
+          nullable: true
+      required: [status]
+
+    PaginatedUsers:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/UserDTO"
+        nextCursor:
+          type: string
+          nullable: true
+      required: [items]
+
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+        details:
+          description: Optional validation or diagnostic metadata
+      required: [status, message]
+
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+
+    LoginResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          description: Short‑lived JWT access token
+        user:
+          $ref: "#/components/schemas/UserDTO"
+      required: [accessToken]
+      description: Refresh token is set as HttpOnly cookie; not returned in body.
+
+    RefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+      required: [accessToken]
+
+    LogoutResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 40cf2348-d871-11ee-8a82-0242ac110002
+        username:
+          type: string
+          example: johndoe
+        email:
+          type: string
+          format: email
+          example: johndoe@example.com
+        displayName:
+          type: string
+          nullable: true
+          example: John Doe
+        avatarUrl:
+          type: string
+          nullable: true
+          format: uri
+          example: https://cdn.example.com/avatar.png
+        createdAt:
+          type: string
+          format: date-time
+          example: 2024-08-01T10:20:30.000Z
+        updatedAt:
+          type: string
+          format: date-time
+          example: 2024-08-01T12:22:45.000Z
+
+    UserProfileDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: 99887766-aaaa-bbbb-cccc-111122223333
+        userId:
+          type: string
+          format: uuid
+          example: 40cf2348-d871-11ee-8a82-0242ac110002
+        bio:
+          type: string
+          nullable: true
+          example: "Full-stack developer. Love TypeScript and cats."
+        location:
+          type: string
+          nullable: true
+          example: "Paris, France"
+        birthdate:
+          type: string
+          format: date
+          nullable: true
+          example: "1998-06-21"
+        website:
+          type: string
+          nullable: true
+          format: uri
+          example: "https://angekouakou.dev"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2024-08-01T12:22:45.000Z"
+      required: [id, userId, updatedAt]
+
+    UserCreate:
+      type: object
+      required: [username, email, password]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: "^[a-zA-Z0-9._-]+$"
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 128
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+
+    UserUpdate:
+      allOf:
+        - $ref: "#/components/schemas/UserCreate"
+      description: Partial update; all fields optional.
+
+    UserProfileCreate:
+      type: object
+      properties:
+        bio:
+          type: string
+          maxLength: 280
+        location:
+          type: string
+          maxLength: 80
+        birthdate:
+          type: string
+          format: date
+        website:
+          type: string
+          format: uri
+
+    UserProfileUpdate:
+      allOf:
+        - $ref: "#/components/schemas/UserProfileCreate"
+
 paths:
+  /auth/csrf:
+    get:
+      tags: [Auth]
+      summary: Issue CSRF cookie & header token (double-submit)
+      description: Returns a CSRF token and sets a CSRF cookie. Use the token as `x-csrf-token` header for state-changing endpoints.
+      responses:
+        "200":
+          description: CSRF token issued
+          headers:
+            set-cookie:
+              schema:
+                type: string
+              description: CSRF cookie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              examples:
+                ok:
+                  value:
+                    status: success
+                    data: null
+
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email & password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Authenticated; refresh cookie set and access token returned.
+          headers:
+            set-cookie:
+              schema:
+                type: string
+              description: HttpOnly `refresh_token` cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/LoginResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Rotate refresh token and get a new access token
+      security:
+        - RefreshCookie: []
+        - CsrfHeader: []
+      responses:
+        "200":
+          description: New access token issued; refresh cookie rotated.
+          headers:
+            set-cookie:
+              schema:
+                type: string
+              description: Rotated HttpOnly `refresh_token` cookie
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/RefreshResponse"
+        "401":
+          description: Missing or invalid refresh cookie
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Missing/invalid CSRF token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout and clear refresh cookie
+      security:
+        - RefreshCookie: []
+        - CsrfHeader: []
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  data:
+                    $ref: "#/components/schemas/LogoutResponse"
+
   /users:
     get:
       tags: [Users]
-      summary: Get all users
+      summary: Get all users (paginated)
+      parameters:
+        - $ref: "#/components/parameters/LimitParam"
+        - $ref: "#/components/parameters/CursorParam"
+        - $ref: "#/components/parameters/QParam"
+        - $ref: "#/components/parameters/BeforeParam"
+        - $ref: "#/components/parameters/AfterParam"
+      security:
+        - BearerAuth: []
       responses:
         "200":
           description: List of users
@@ -34,12 +409,18 @@ paths:
                     type: string
                     example: success
                   data:
-                    type: array
-                    items:
-                      $ref: "#/components/schemas/UserDTO"
+                    $ref: "#/components/schemas/PaginatedUsers"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     post:
       tags: [Users]
       summary: Create a user
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -61,17 +442,24 @@ paths:
                     $ref: "#/components/schemas/UserDTO"
         "409":
           description: Email or username already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /users/{id}:
     get:
       tags: [Users]
       summary: Get user by ID
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: User found
@@ -87,15 +475,22 @@ paths:
                     $ref: "#/components/schemas/UserDTO"
         "404":
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     put:
       tags: [Users]
       summary: Update user by ID
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -117,15 +512,22 @@ paths:
                     $ref: "#/components/schemas/UserDTO"
         "404":
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     delete:
       tags: [Users]
       summary: Delete user by ID
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: User deleted
@@ -138,20 +540,28 @@ paths:
                     type: string
                     example: success
                   data:
+                    nullable: true
                     type: "null"
         "404":
           description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
 
   /users/{userId}/profile:
     get:
       tags: [User Profiles]
       summary: Get user profile by user ID
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: userId
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: User profile found
@@ -167,15 +577,22 @@ paths:
                     $ref: "#/components/schemas/UserProfileDTO"
         "404":
           description: User profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     post:
       tags: [User Profiles]
       summary: Create a user profile
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: userId
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -197,15 +614,22 @@ paths:
                     $ref: "#/components/schemas/UserProfileDTO"
         "409":
           description: User already has a profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
     put:
       tags: [User Profiles]
       summary: Update user profile by user ID
+      security:
+        - BearerAuth: []
       parameters:
         - in: path
           name: userId
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
         required: true
         content:
@@ -227,97 +651,7 @@ paths:
                     $ref: "#/components/schemas/UserProfileDTO"
         "404":
           description: User profile not found
-
-components:
-  schemas:
-    UserDTO:
-      type: object
-      properties:
-        id:
-          type: string
-          example: 40cf2348-d871-11ee-8a82-0242ac110002
-        username:
-          type: string
-          example: johndoe
-        email:
-          type: string
-          format: email
-          example: johndoe@example.com
-        displayName:
-          type: string
-          nullable: true
-          example: John Doe
-        avatarUrl:
-          type: string
-          nullable: true
-          example: https://cdn.example.com/avatar.png
-        createdAt:
-          type: string
-          format: date-time
-          example: 2024-08-01T10:20:30.000Z
-        updatedAt:
-          type: string
-          format: date-time
-          example: 2024-08-01T12:22:45.000Z
-
-    UserProfileDTO:
-      type: object
-      properties:
-        id:
-          type: string
-          example: 99887766-aaaa-bbbb-cccc-111122223333
-        userId:
-          type: string
-          example: 40cf2348-d871-11ee-8a82-0242ac110002
-        bio:
-          type: string
-          nullable: true
-          example: "Full-stack developer. Love TypeScript and cats."
-        location:
-          type: string
-          nullable: true
-          example: "Paris, France"
-        birthdate:
-          type: string
-          format: date
-          nullable: true
-          example: "1998-06-21"
-        website:
-          type: string
-          nullable: true
-          example: "https://angekouakou.dev"
-        updatedAt:
-          type: string
-          format: date-time
-          example: "2024-08-01T12:22:45.000Z"
-      required:
-        - id
-        - userId
-        - updatedAt
-
-    UserCreate:
-      type: object
-      required: [username, email, password]
-      properties:
-        username:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-
-    UserUpdate:
-      type: object
-      properties:
-        username:
-          type: string
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-        displayName:
-          type: string
-        avatarUrl:
-          type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
