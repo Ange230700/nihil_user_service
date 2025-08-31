@@ -1,0 +1,14 @@
+# user\.dockerignore
+
+node_modules
+dist
+coverage
+.nyc_output
+.git
+.gitignore
+Dockerfile.dev
+*.log
+.env
+.env.*
+.nx
+.vscode
