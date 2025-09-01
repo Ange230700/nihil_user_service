@@ -4,6 +4,7 @@ import express from "express";
 import type { ErrorRequestHandler } from "express";
 import cookieParser from "cookie-parser";
 import crypto from "crypto";
+import helmet from "helmet";
 
 import router from "@nihil_backend/user/api/router.js";
 import { sendError } from "@nihil_backend/user/api/helpers/sendResponse.js";
@@ -20,29 +21,78 @@ app.use(express.urlencoded({ extended: true, limit: "512kb" }));
 
 app.use(cookieParser());
 
-// Generate a nonce per response and set CSP using it
-app.use((_, res, next) => {
+/**
+ * Per-response nonce
+ * (Do NOT set a manual CSP header yourself — Helmet will emit the single CSP)
+ */
+app.use((_req, res, next) => {
   const nonce = crypto.randomBytes(16).toString("base64");
   (res.locals as { cspNonce: string }).cspNonce = nonce;
-
-  res.setHeader(
-    "Content-Security-Policy",
-    [
-      "default-src 'self'",
-      "base-uri 'self'",
-      "form-action 'self'",
-      "img-src 'self' data: blob:",
-      "font-src 'self' data:",
-      "style-src 'self' 'unsafe-inline'", // Swagger UI uses inline styles
-      `script-src 'self' 'nonce-${nonce}'`, // <-- allow only scripts with this nonce
-      "connect-src 'self'",
-      "worker-src 'self' blob:",
-      "manifest-src 'self'",
-      "frame-ancestors 'self'",
-    ].join("; "),
-  );
   next();
 });
+
+/** Narrow Helmet’s loose `res` type safely (no `any`) */
+function readNonceFromRes(resParam: unknown): string {
+  if (
+    resParam &&
+    typeof resParam === "object" &&
+    "locals" in (resParam as Record<string, unknown>)
+  ) {
+    const locals = (resParam as Record<string, unknown>).locals;
+    if (
+      locals &&
+      typeof locals === "object" &&
+      "cspNonce" in (locals as Record<string, unknown>)
+    ) {
+      const n = (locals as Record<string, unknown>).cspNonce;
+      if (typeof n === "string" && n.length > 0) return n;
+    }
+  }
+  // This should never happen if the nonce middleware ran.
+  // Returning an empty nonce yields an invalid directive instead of using unsafe-inline.
+  return "";
+}
+
+/**
+ * Helmet CSP with nonce + all needed directives for Swagger UI
+ * Note: we allow "unsafe-inline" in style only (Swagger UI inlines styles).
+ * Scripts are locked to the per-response nonce (no global unsafe-inline).
+ */
+app.use(
+  helmet.contentSecurityPolicy({
+    useDefaults: true,
+    directives: {
+      // Core
+      "default-src": ["'self'"],
+      "base-uri": ["'self'"],
+      "form-action": ["'self'"],
+      "frame-ancestors": ["'self'"],
+
+      // Static/media
+      "img-src": ["'self'", "data:", "blob:"],
+      "font-src": ["'self'", "data:"],
+      "style-src": ["'self'", "'unsafe-inline'"],
+
+      // Scripts: nonce + strict-dynamic (blocks other sources unless nonce'd)
+      "script-src": [
+        "'self'",
+        (_req, res) => `'nonce-${readNonceFromRes(res)}'`,
+        "'strict-dynamic'",
+      ],
+
+      // Networking / workers / manifest
+      "connect-src": ["'self'"],
+      "worker-src": ["'self'", "blob:"],
+      "manifest-src": ["'self'"],
+
+      // Hardening
+      "object-src": ["'none'"],
+      "frame-src": ["'self'"], // keep if you use oauth2-redirect.html in same origin
+      "upgrade-insecure-requests": [], // optional modern hardening
+      // "block-all-mixed-content": [], // legacy; not needed if using upgrade-insecure-requests
+    },
+  }),
+);
 
 app.use("/api", router);
 
