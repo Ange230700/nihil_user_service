@@ -13,6 +13,7 @@ import { securityMiddleware } from "@nihil_backend/user/api/security/index.js";
 import { ZodError } from "zod";
 
 const app = express();
+const isDev = process.env.NODE_ENV === "development";
 
 app.use(buildCors(), ...securityMiddleware);
 
@@ -31,25 +32,20 @@ app.use((_req, res, next) => {
   next();
 });
 
-/** Narrow Helmet’s loose `res` type safely (no `any`) */
+// Helper to read nonce
 function readNonceFromRes(resParam: unknown): string {
   if (
     resParam &&
     typeof resParam === "object" &&
     "locals" in (resParam as Record<string, unknown>)
   ) {
-    const locals = (resParam as Record<string, unknown>).locals;
-    if (
-      locals &&
-      typeof locals === "object" &&
-      "cspNonce" in (locals as Record<string, unknown>)
-    ) {
-      const n = (locals as Record<string, unknown>).cspNonce;
-      if (typeof n === "string" && n.length > 0) return n;
-    }
+    const locals = (resParam as Record<string, unknown>).locals as Record<
+      string,
+      unknown
+    >;
+    const n = locals?.cspNonce;
+    if (typeof n === "string") return n;
   }
-  // This should never happen if the nonce middleware ran.
-  // Returning an empty nonce yields an invalid directive instead of using unsafe-inline.
   return "";
 }
 
@@ -78,10 +74,11 @@ app.use(
         "'self'",
         (_req, res) => `'nonce-${readNonceFromRes(res)}'`,
         "'strict-dynamic'",
+        ...(isDev ? (["'unsafe-eval'"] as const) : []),
       ],
 
       // Networking / workers / manifest
-      "connect-src": ["'self'"],
+      "connect-src": isDev ? ["'self'", "ws:", "http:", "https:"] : ["'self'"],
       "worker-src": ["'self'", "blob:"],
       "manifest-src": ["'self'"],
 
