@@ -8,4 +8,7 @@ declare module "express-serve-static-core" {
     cookies?: Record<string, string>;
     signedCookies?: Record<string, string>;
   }
+  interface Response {
+    locals: Record<string, unknown> & { cspNonce?: string };
+  }
 }
