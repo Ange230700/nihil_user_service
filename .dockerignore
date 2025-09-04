@@ -1,4 +1,4 @@
-# user\.dockerignore
+# nihil_backend\user\.dockerignore
 
 node_modules
 dist

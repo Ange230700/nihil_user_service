@@ -1,4 +1,4 @@
-<!-- user\README.md -->
+<!-- nihil_backend\user\README.md -->
 
 # Nihil User Service
 
@@ -76,8 +76,8 @@ http://localhost:3001/api/docs
 ### Installation
 
 ```bash
-git clone https://github.com/Ange230700/nihil_databases.git
-cd nihil_databases/user
+git clone https://github.com/Ange230700/nihil_user_service.git
+cd nihil_backend/user
 npm install
 ```
 
